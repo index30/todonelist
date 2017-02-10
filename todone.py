@@ -45,12 +45,9 @@ def cmd_add(args):
     add_task(args.db, task)
 
 def cmd_list(args):
-    #if args.all:
     tasks = all_task(args.db)
     for key, task in tasks:
         print("{0} {1}".format(key, format_task(task)))
-    #else:
-        #print("No task")
 
 def cmd_tag(args):
     tag = input('tag:')
@@ -69,7 +66,6 @@ def main():
     list_parser.add_argument('-a', '--all', action="store_true")
     list_parser.set_defaults(func=cmd_list)
     tag_parser = subparsers.add_parser('tag')
-    #tag_parser.add_argument('task')
     tag_parser.set_defaults(func=cmd_tag)
 
     args = parser.parse_args()
@@ -86,10 +82,5 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-#task1 = create_task("言語処理100本ノック", "Part2まで終了", "Python")
-#print(format_task(task1))
-#update_task(task1, "まだまだこれから")
-#print(format_task(task1))
 
 
