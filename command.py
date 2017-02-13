@@ -11,18 +11,15 @@ class Command:
         Task.create_task(name, content, tag, done_date, args.db)
 
     def cmd_list(args):
-        tasks = Task.all_task(args.db)
+        if args.tag is None:
+            tasks = Task.all_task(args.db)
+        else:
+            tasks = Task.tag_task(args.db, args.tag)
         if args.sort:
             sort_task = args.sort
         else:
             sort_task = 'task_id'
         for key, task in sorted(tasks, key=lambda x: x[1][sort_task]):
-            print("{0}".format(Task.format_task(task)))
-
-    def cmd_tag(args):
-        tag = input('tag:')
-        tasks = Task.tag_task(args.db, tag)
-        for key, task in tasks:
             print("{0}".format(Task.format_task(task)))
 
     def cmd_content(args):
@@ -38,4 +35,3 @@ class Command:
                     Task.update_task(t, content)
                     task = Task.part_task(args.db, task_name)
                 print("{0}".format(Task.format_content(t)))
-

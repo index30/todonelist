@@ -9,7 +9,7 @@ class Task:
         task = dict(name=name, content=content, tag=tag,
                     done_date=done_date, task_id=task_id, tag_id=tag_id)
         db[task_key] = task
-        
+
     def format_task(task):
         format = "{task[tag]}: {task[name]}: {task[done_date]}"
         return format.format(task=task)
@@ -40,9 +40,6 @@ class Task:
                 yield key, db[key]
 
     def tag_task(db, tag):
-        return(sorted(
-            (key, task)
-            for key, task in all_task(db)
-            if task['tag'] == tag
-        )
-        )
+        for key in db:
+            if key.startswith('task:') and db[key]['tag'] == tag:
+                yield key, db[key]
