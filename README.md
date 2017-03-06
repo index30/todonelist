@@ -21,11 +21,13 @@ git clone git@github.com:index30/todonelist.git
 ./todone.py task_data list
 ./todone.py task_data list -s (sort_name)
 ./todone.py task_data list -t (tag_name)
+./todone.py task_data list -p
 ```
 
 タスクの一覧表示  
 * -s ... ソートされたタスクの一覧表示(ex. task_idなどを引数にとるとタスクを生成した順(昇順)にソート)  
 * -t ... タスクを指定したタグに絞って表示  
+* -p ... タスクの一覧を円グラフで表示
 
 ```
 ./todone.py task_data content

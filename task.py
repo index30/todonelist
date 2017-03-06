@@ -1,8 +1,7 @@
 import sys
 from texttable import Texttable
-#import pandas as pd
-#import pandas.tools.plotting as plotting
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import sqlite3
 
 
@@ -90,8 +89,15 @@ class Task:
             print(table.draw())
 
     def print_task(db):
-        #未実装
-        cur = db.cursor()
-        num = cur.execute('select count(*) from tasks')
-        print(list(cur.execute('select * from tasks')))
-        #df = pd.DataFrame(cur.execute('select * from tasks'))
+        with db:
+            data = []
+            d_num = []
+            for tag, row in db.execute('select tag,count(*) from tasks group by tag'):
+                data.append(tag)
+                d_num.append(row)
+            fig = plt.figure()
+            fig.patch.set_facecolor('white')
+            #colorsにcolormapを代入できない
+            plt.pie(d_num, labels=data, counterclock=False, startangle=90, autopct='%1.1f%%',)
+            plt.axis('equal')
+            plt.show()
