@@ -1,5 +1,11 @@
 from datetime import datetime
 from task import Task
+from logging import getLogger, StreamHandler, DEBUG
+logger = getLogger(__name__)
+handler = StreamHandler()
+handler.setLevel(DEBUG)
+logger.setLevel(DEBUG)
+logger.addHandler(handler)
 
 
 class Command:
@@ -9,25 +15,23 @@ class Command:
         tag = input('task\'s tag:')
         done_date = datetime.strptime(input('done date [Y-m]:'), '%Y-%m')
         Task.create_task(name, content, tag, done_date, args.db)
+        logger.info("Create task:{0}".format(name))
 
     def cmd_list(args):
-        if args.tag is None:
-            Task.all_task(args.db)
+        if args.print:
+            Task.print_task(args.db)
+        if args.tag or args.sort:
+            Task.sorted_task(args.db, args.tag, args.sort)
         else:
-            Task.tag_task(args.db, args.tag)
-        #if args.sort:
-        #    sort_task = args.sort
-        #else:
-        #    sort_task = 'task_id'
+            Task.all_task(args.db)
 
     def cmd_content(args):
-        task_name = input('task_name:')
-        if args.delete:
+        task_name = input('please input task\'s name:')
+        b_exist = Task.part_task(args.db, task_name)
+        if args.delete and b_exist:
             Task.delete_task(args.db, task_name)
-            print("Delete task:{0}", task_name)
-        else:
-            Task.part_task(args.db, task_name)
-            if args.change:
-                content = input('content:')
-                Task.update_task(args.db, task_name, content)
-                Task.part_task(args.db, task_name)
+            logger.info("Delete task:{0}".format(task_name))
+        elif args.change and b_exist:
+            content = input('content:')
+            Task.update_task(args.db, task_name, content)
+            logger.info("Update task:{0}".format(task_name))

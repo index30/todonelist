@@ -13,8 +13,9 @@ def main():
     add_parser.set_defaults(func=Command.cmd_add)
     list_parser = subparsers.add_parser('list')
     list_parser.add_argument('-t', '--tag')
-    #list_parser.add_argument('-s', '--sort',
-    #                         default="task_id")
+    list_parser.add_argument('-s', '--sort',
+                             default="id")
+    list_parser.add_argument('-p', '--print', action="store_true")
     list_parser.set_defaults(func=Command.cmd_list)
     content_parser = subparsers.add_parser('content')
     content_parser.add_argument('-c', '--change', action="store_true")

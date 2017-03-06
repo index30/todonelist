@@ -1,42 +1,97 @@
+import sys
+from texttable import Texttable
+#import pandas as pd
+#import pandas.tools.plotting as plotting
+#import matplotlib.pyplot as plt
+import sqlite3
+
+
 class Task:
 
     def create_task(name, content, tag, done_date, db):
-        cur = db.cursor()
         c_sql = 'select count(*) from tasks where tag = ?'
         sql = 'insert into tasks (tag_id, name, content, tag, done_date) values (?, ?, ?, ?, ?)'
-        tag_id = int(str(cur.execute(c_sql, [tag]).fetchone()[0]))
-        task = (tag_id, name, content, tag, done_date)
-        cur.execute(sql, task)
-        db.commit()
-        db.close()
+        try:
+            with db:
+                tag_id = int(str(db.execute(c_sql, [tag]).fetchone()[0])) + 1
+                task = [tag_id, name, content, tag, done_date]
+                db.execute(sql, task)
+        except sqlite3.IntegrityError:
+            print("Couldn't add twice", file=sys.stderr)
 
     def update_task(db, name, content):
         sql = 'update tasks set content = ? where name = ?'
         update = [content, name]
-        db.execute(sql, update)
-        db.commit()
-        db.close()
+        with db:
+            db.execute(sql, update)
 
     def delete_task(db, name):
-        cur = db.cursor()
         sql = 'delete from tasks where name = ?'
-        cur.execute(sql, [name])
-        db.commit()
-        db.close()
+        with db:
+            db.execute(sql, [name])
 
     def all_task(db):
-        cur = db.cursor()
         sql = 'select * from tasks'
-        for row in cur.execute(sql):
-            print(row[4])
-        db.close()
+        table = Texttable()
+        table.set_deco(Texttable.HEADER)
+        table.set_cols_width([5, 6, 20, 70, 25, 30])
+        table.header(['id', 'tag_id', 'タスク名', '内容', 'タグ', 'done_date'])
+        table.set_cols_dtype(['i',
+                              'i',
+                              't',
+                              't',
+                              't',
+                              't'])
+        table.set_cols_align(["l", "l", "c", "c", "c", "c"])
+        with db:
+            for row in db.execute(sql):
+                table.add_row(list(row))
+            print(table.draw())
 
     def part_task(db, task_name):
         sql = 'select * from tasks where name=?'
-        for key in db.execute(sql, task_name):
-            print("tag: {row[4]}\n name: {row[2]}\n content: {row[3]}\n done_date: {row[5]}")
+        with db:
+            if db.execute(sql, [task_name]).fetchone():
+                for row in db.execute(sql, [task_name]):
+                    print("task_id:{0}\ntag_id:{1}\nname:{2}\ntag:{3}\ncontent:{4}\ndone_date:{5}".format(row[0], row[1], row[2], row[4], row[3], row[5]))
+                    return True
+            else:
+                print("This task doesn't exist", file=sys.stderr)
+                return False
 
-    def tag_task(db, tag):
-        sql = 'select * from tasks where tag=?'
-        for row in db.execute(sql, tag):
-            print("{row[4]}...{row[2]} <date>:{row[5]}")
+    def sorted_task(db, tag, sort):
+        with db:
+            if tag:
+                if sort:
+                    sql = 'select * from tasks where tag=? order by '+sort
+                    ele = [tag, sort]
+                    rows = db.execute(sql, ele)
+                else:
+                    sql = 'select * from tasks where tag=?'
+                    ele = [tag]
+                    rows = db.execute(sql, ele)
+            else:
+                if sort:
+                    sql = 'select * from tasks order by '+sort
+                    rows = db.execute(sql)
+            table = Texttable()
+            table.set_deco(Texttable.HEADER)
+            table.set_cols_width([5, 6, 20, 70, 25, 30])
+            table.header(['id', 'tag_id', 'タスク名', '内容', 'タグ', 'done_date'])
+            table.set_cols_dtype(['i',
+                                  'i',
+                                  't',
+                                  't',
+                                  't',
+                                  't'])
+            table.set_cols_align(["l", "l", "c", "c", "c", "c"])
+            for row in rows:
+                table.add_row(list(row))
+            print(table.draw())
+
+    def print_task(db):
+        #未実装
+        cur = db.cursor()
+        num = cur.execute('select count(*) from tasks')
+        print(list(cur.execute('select * from tasks')))
+        #df = pd.DataFrame(cur.execute('select * from tasks'))
