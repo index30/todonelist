@@ -1,7 +1,8 @@
 import sys
 from texttable import Texttable
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
+from matplotlib import cm, colors
+import numpy as np
 import sqlite3
 
 
@@ -89,6 +90,11 @@ class Task:
             print(table.draw())
 
     def print_task(db):
+        def get_colormap(num):
+            normalize = colors.Normalize(vmin=min(num), vmax=max(num))
+            color_map = cm.get_cmap('RdBu')
+            return color_map(normalize(num))
+
         with db:
             data = []
             d_num = []
@@ -97,7 +103,7 @@ class Task:
                 d_num.append(row)
             fig = plt.figure()
             fig.patch.set_facecolor('white')
-            #colorsにcolormapを代入できない
-            plt.pie(d_num, labels=data, counterclock=False, startangle=90, autopct='%1.1f%%',)
+            plt.pie(d_num, labels=data, counterclock=False, startangle=90,
+                    autopct='%1.1f%%', colors=get_colormap(range(1, len(d_num)+1)))
             plt.axis('equal')
             plt.show()
